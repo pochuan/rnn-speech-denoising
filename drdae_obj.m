@@ -75,7 +75,7 @@ end;
 
 % DROPOUT: vector of length of hidden layers with 0 or 1 
 % (to drop or keep activation unit) with prob=0.5
-hActToDrop = cell(numel(eI.layerSizes-1),1);
+hActToDrop = cell(numel(eI.layerSizes)-1,1);
 for i=1:numel(eI.layerSizes)-1
  if eI.dropout
    hActToDrop{i} = round(rand(eI.layerSizes(i),1));
@@ -92,7 +92,7 @@ for c = 1:numel(data_cell)
     uttPred = [];
     T =size(data,1) / eI.inputDim;
     % store hidden unit activations at each time instant
-    hAct = cell(numel(eI.layerSizes-1), T);
+    hAct = cell(numel(eI.layerSizes)-1, T);
     for t = 1:T
         %% forward prop all hidden layers
         for l = 1:numel(eI.layerSizes)-1
@@ -121,72 +121,109 @@ for c = 1:numel(data_cell)
     end;    
     %% compute cost and backprop through time
     if  eI.temporalLayer
-        delta_t = zeros(eI.layerSizes(eI.temporalLayer),size(data,2));
+      delta_t = zeros(eI.layerSizes(eI.temporalLayer),size(data,2));
     end;    
+    
     for t = T:-1:1
-        l = numel(eI.layerSizes);
-        %% forward prop output layer for this timestep
-        curPred = bsxfun(@plus, stack{l}.W * hAct{l-1,t}, stack{l}.b);
-        % add short circuit to regression prediction if model has it
-        if eI.shortCircuit
-            curPred = curPred + stack{end}.W_ss ...
-                * data((t-1)*eI.inputDim+1:t*eI.inputDim, :);
+	
+      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      %%%%%%%%%%%%%%% final layer begin
+      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+      l = numel(eI.layerSizes);
+      %% forward prop output layer for this timestep
+      %% Of course these are not probs yet, but we will compute
+      %% probabilities in place.
+      predProbs = bsxfun(@plus, stack{l}.W * hAct{l-1,t}, stack{l}.b);
+
+      % add short circuit to regression prediction if model has it
+      if eI.shortCircuit
+        predProbs = predProbs + stack{end}.W_ss ...
+			    * data((t-1)*eI.inputDim+1:t*eI.inputDim, :);
+      end;
+
+      %% softmax layer
+      predProbs = bsxfun(@minus, predProbs, max(predProbs));
+      predProbs = exp(predProbs);
+      predProbs = bsxfun(@rdivide,predProbs,sum(predProbs));
+
+      %% return here if only predictions desired. 
+      %% if po
+      %% 	cost = -1; ceCost = -1; wCost = -1; numCorrect = -1;
+      %% 	grad = [];
+      %% 	numExamples = size(data,2);
+      %% 	return;
+      %% end;
+
+      if pred_out, uttPred = [predProbs; uttPred]; end;
+      % skip loss computation if no targets given
+      if isempty(targets), continue; end;
+      trueLabels = targets(t,:);
+      num_samples = size(trueLabels,2);
+
+      groundTruth = sparse(trueLabels, 1:num_samples, 1, eI.layerSizes(end), num_samples);
+      if eI.useGpu
+	groundTruth = gsingle(full(groundTruth));
+      end;
+      %% compute accuracy
+      [~,predLabels] = max(predProbs);
+      % accList = [accList; mean(pred'==curLabels)];
+      % numExList = [numExList; m];
+      numCorrect = double(sum(predLabels==trueLabels));
+      
+      %% compute cost
+      cost = (-1/num_samples) * nansum(nansum(log(predProbs) .* (groundTruth)));
+
+
+      %% compute gradient for SM layer
+      delta =  predProbs-groundTruth;
+      stackGrad{end}.W = stackGrad{end}.W + (1/num_samples)*delta*hAct{end-1,t}';
+      stackGrad{end}.b = stackGrad{end}.b + (1/num_samples)*sum(delta, 2);
+      % prop error through SM layer
+      delta = stack{end}.W'*delta;
+      
+      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      %%%%%%%%%%%%%%% final layer end
+      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      
+      %% backprop through hidden layers
+      for l = numel(eI.layerSizes)-1:-1:1
+        % aggregate temporal delta term if this is the recurrent layer
+        if l == eI.temporalLayer
+          delta = delta + delta_t;
         end;
-        if pred_out, uttPred = [curPred; uttPred]; end;
-        % skip loss computation if no targets given
-        if isempty(targets), continue; end;
-        curTargets = targets((t-1)*outputDim+1:t*outputDim, :);
-        %% compute cost. Squared L2 loss
-        delta = curPred - curTargets;
-        cost = cost + 0.5 * sum(delta(:).^2);
-        if fprop_only, continue; end;
-        %% regression layer gradient and delta        
-        stackGrad{l}.W = stackGrad{l}.W + delta * hAct{l-1,t}';
+        % push delta through activation function for this layer
+        % tanh unit choice assumed
+        if strcmpi(eI.activationFn,'tanh')
+          delta = delta .* (1 - hAct{l,t}.^2);
+        elseif strcmpi(eI.activationFn,'logistic')
+          delta = delta .* hAct{l,t} .* (1 - hAct{l,t});
+        else
+          error('unrecognized activation function: %s',eI.activationFn);
+        end;            
+        
+        % gradient of bottom-up connection for this layer            
+        if l > 1
+          stackGrad{l}.W = stackGrad{l}.W + delta * hAct{l-1,t}';
+        else
+          stackGrad{l}.W = stackGrad{l}.W + delta * data((t-1)*eI.inputDim+1:t*eI.inputDim, :)';
+        end;
+        % gradient for bias
         stackGrad{l}.b = stackGrad{l}.b + sum(delta,2);
-        % short circuit layer
-        if eI.shortCircuit
-            stackGrad{end}.W_ss = stackGrad{end}.W_ss + delta ...
-                * data((t-1)*eI.inputDim+1:t*eI.inputDim, :)';
+        
+        % compute derivative and delta for temporal connections
+        if l == eI.temporalLayer && t > 1
+          W_t_grad = W_t_grad + delta * hAct{l,t-1}';
+          % push delta through temporal weights
+          delta_t = W_t' * delta;
         end;
-        delta = stack{l}.W' * delta;
-        %% backprop through hidden layers
-        for l = numel(eI.layerSizes)-1:-1:1
-            % aggregate temporal delta term if this is the recurrent layer
-            if l == eI.temporalLayer
-                delta = delta + delta_t;
-            end;
-            % push delta through activation function for this layer
-            % tanh unit choice assumed
-            if strcmpi(eI.activationFn,'tanh')
-                delta = delta .* (1 - hAct{l,t}.^2);
-            elseif strcmpi(eI.activationFn,'logistic')
-                delta = delta .* hAct{l,t} .* (1 - hAct{l,t});
-            else
-                error('unrecognized activation function: %s',eI.activationFn);
-            end;            
-            
-            % gradient of bottom-up connection for this layer            
-            if l > 1
-                stackGrad{l}.W = stackGrad{l}.W + delta * hAct{l-1,t}';
-            else
-                stackGrad{l}.W = stackGrad{l}.W + delta * data((t-1)*eI.inputDim+1:t*eI.inputDim, :)';
-            end;
-            % gradient for bias
-            stackGrad{l}.b = stackGrad{l}.b + sum(delta,2);
-            
-            % compute derivative and delta for temporal connections
-            if l == eI.temporalLayer && t > 1
-                 W_t_grad = W_t_grad + delta * hAct{l,t-1}';
-                 % push delta through temporal weights
-                 delta_t = W_t' * delta;
-            end;
             % push delta through bottom-up weights
-            if l > 1 
-                delta = stack{l}.W' * delta;
-            end;
-        end
-        % reduces avg memory usage but doesn't reduce peak
-        %hAct(:,t) = [];
+        if l > 1 
+          delta = stack{l}.W' * delta;
+        end;
+      end
+    % reduces avg memory usage but doesn't reduce peak
+    %hAct(:,t) = [];
     end
     pred_cell{c} = uttPred;
     % Return the activations for this utterance. 
