@@ -176,7 +176,7 @@ for c = 1:numel(data_cell)
 
       %% compute gradient for SM layer
       delta =  predProbs-groundTruth;
-      stackGrad{end}.W = stackGrad{end}.W + (1/num_samples)*delta*hAct{end-1}';
+      stackGrad{end}.W = stackGrad{end}.W + (1/num_samples)*delta*hAct{l-1,t}';
       stackGrad{end}.b = stackGrad{end}.b + (1/num_samples)*sum(delta, 2);
       % prop error through SM layer
       delta = stack{end}.W'*delta;
