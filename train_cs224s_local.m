@@ -62,7 +62,7 @@ eI.subdirs = snrList;
 % [data_cell, targets_cell] = load_aurora( baseDir, 'Mfc08_multiTR', snrList, -1, eI );
 data_cell = {};
 data_cell{1} = rand(eI.inputDim*50,4);
-targets_cell{1} = rand(eI.featDim*50,4);
+targets_cell{1} = ceil(rand(eI.featDim*50,4)*4); % have to be positive integers
 
 % dieplay mean as a whitening debug check
 %disp(mean(data_cell{1},2));

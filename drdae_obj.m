@@ -162,9 +162,9 @@ for c = 1:numel(data_cell)
       num_samples = size(trueLabels,2);
 
       groundTruth = sparse(trueLabels, 1:num_samples, 1, eI.layerSizes(end), num_samples);
-      if eI.useGpu
-	groundTruth = gsingle(full(groundTruth));
-      end;
+    %  if eI.useGpu
+	%groundTruth = gsingle(full(groundTruth));
+    %  end;
       %% compute accuracy
       [~,predLabels] = max(predProbs);
       % accList = [accList; mean(pred'==curLabels)];
@@ -174,10 +174,9 @@ for c = 1:numel(data_cell)
       %% compute cost
       cost = (-1/num_samples) * nansum(nansum(log(predProbs) .* (groundTruth)));
 
-
       %% compute gradient for SM layer
       delta =  predProbs-groundTruth;
-      stackGrad{end}.W = stackGrad{end}.W + (1/num_samples)*delta*hAct{end-1,t}';
+      stackGrad{end}.W = stackGrad{end}.W + (1/num_samples)*delta*hAct{end-1}';
       stackGrad{end}.b = stackGrad{end}.b + (1/num_samples)*sum(delta, 2);
       % prop error through SM layer
       delta = stack{end}.W'*delta;
@@ -245,7 +244,7 @@ cost = cost + wCost;
 
 %% print output
 if ~isSlave && ~isempty(targets_cell)
-    fprintf('loss:  %f  wCost:  %f \t',avCost, avWCost);
+    fprintf('loss:  %f  wCost:  %f \t',full(avCost), avWCost);
     fprintf('wNorm: %f  rNorm: %f  oNorm: %f\n',sum(stack{1}.W(:).^2),...
         sum(W_t(:).^2), sum(stack{end}.W(:).^2));
 % plot(theta,'kx');drawnow;
