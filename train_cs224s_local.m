@@ -3,7 +3,7 @@
 
 %% setup paths for code. assumed this script runs in its own directory
 codeDir = '.';
-minFuncDir = '../minFunc_2012/';
+minFuncDir = '/home/mkayser/school/classes/2013_14_spring/cs224s/project/other-resources/minFunc_2012';
 baseDir = '../scratch/';
 %% AMAAS setup
 %codeDir = '/afs/cs.stanford.edu/u/amaas/scratch/audio/audio_repo/matlab_wd/drdae';
@@ -14,23 +14,24 @@ addpath(genpath(minFuncDir));
 %% setup network architecture
 eI = [];
 % dimension of each input frame
-eI.featDim = 14;
+eI.featDim = 13;
 eI.outputDim = 1;
+eI.labelSetSize = 234;
 eI.dropout = 0;
 % context window size of the input.
 eI.winSize = 3;
 % weight tying in hidden layers
 % if you want tied weights, must have odd number of *hidden* layers
 eI.tieWeights = 0;
-% 2 hidden layers and output layer
-eI.layerSizes = [512 eI.outputDim];
+% hidden layers and output layer
+eI.layerSizes = [512 eI.labelSetSize];
 % highest hidden layer is temporal
 eI.temporalLayer = 0;
 % dim of network input at each timestep (final size after window & whiten)
 eI.inputDim = eI.featDim * eI.winSize;
 % length of input sequence chunks.
 % eI.seqLen = [1 10 25 50 100];
-eI.seqLen = [50];
+eI.seqLen = [1 50 100];
 % activation function
 eI.activationFn = 'tanh';
 % temporal initialization type
@@ -60,10 +61,14 @@ snrList = {'clean1', 'N1_SNR5', 'N1_SNR10', 'N1_SNR15', 'N1_SNR20', ...
 'clean2', 'N2_SNR5', 'N2_SNR10', 'N2_SNR15', 'N2_SNR20', ...
 'clean3', 'N3_SNR5', 'N3_SNR10', 'N3_SNR15', 'N3_SNR20', };
 eI.subdirs = snrList;
-% [data_cell, targets_cell] = load_aurora( baseDir, 'Mfc08_multiTR', snrList, -1, eI );
-data_cell = {};
-data_cell{1} = rand(eI.inputDim*50,4);
-targets_cell{1} = ceil(rand(eI.featDim*50,4)*4); % have to be positive integers
+
+% number of utterances to use
+M=3;
+dir='/home/mkayser/school/classes/2013_14_spring/cs224s/project/rnn-speech-denoising/data/output/';
+file_num=1;
+feat_dim=13;
+
+[data_cell, targets_cell] = load_nn_data(dir, file_num, feat_dim, M, eI);
 
 % dieplay mean as a whitening debug check
 %disp(mean(data_cell{1},2));

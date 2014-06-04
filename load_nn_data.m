@@ -22,6 +22,8 @@ function [ data_cell, target_cell ]  = load_nn_data(dir, file_num, feat_dim, M, 
   %[nframes , nfeats] = size(f);
   %disp(f(1:10,:));
 
+  a = uint32(a);
+
   assert(nframes == nframes2);
   assert(nlabels == eI.outputDim);
   assert(nfeats == eI.featDim);
@@ -44,9 +46,15 @@ function [ data_cell, target_cell ]  = load_nn_data(dir, file_num, feat_dim, M, 
   start_index=1;
   for i=1:M
     T = utt_dat.sizes(i);
+    %T
     remainder = T;  
     for i=length(eI.seqLen):-1:1
-      num = floor(remainder/eI.seqLen(i));
+      num = floor(single(remainder)/eI.seqLen(i));  % Nasty octave
+				% bug here without the typecast
+      %remainder
+      %eI.seqLen(i)
+      %remainder/eI.seqLen(i)
+      %num
       remainder = mod(remainder,eI.seqLen(i));
       seqLenSizes(i) = seqLenSizes(i)+num;
     end
@@ -101,12 +109,14 @@ function [ data_cell, target_cell ]  = load_nn_data(dir, file_num, feat_dim, M, 
     assert(size(fwindows,2) == T); %, '%d windows which does not equal %d frames', fwindows, nframes);
 
     %% put it in the correct cell area.
+    %T
     while T > 0
       % assumes length in ascending order.
       % Finds longest length shorter than utterance
       c = find(eI.seqLen <= T, 1,'last');
       
       binLen = eI.seqLen(c);
+      %binLen
       assert(~isempty(c),'could not find length bin for %d',T);
       % copy data for this chunk
       data_cell{c}(:,seqLenPositions(c))=reshape(fwindows(:,1:binLen),[],1);
@@ -121,9 +131,13 @@ function [ data_cell, target_cell ]  = load_nn_data(dir, file_num, feat_dim, M, 
     end;
   end;
 
-  for j=1:length(data_cell)
-      disp(size(data_cell{j}));
-  end
+  %seqLenPositions
+  %seqLenSizes
+  assert(seqLenPositions == seqLenSizes+1);
+
+  %for j=1:length(data_cell)
+  %    disp(size(data_cell{j}));
+  %end
   %disp(data_cell{3}(:,1));
   %a=data_cell{1};
   %b=data_cell{2};

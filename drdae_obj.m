@@ -86,14 +86,17 @@ end
 
 %% loop over each distinct length
 for c = 1:numel(data_cell)
+    %c
     data = data_cell{c};
     targets = {};
     if ~isempty(targets_cell), targets = targets_cell{c}; end;
+    %targets
     uttPred = [];
     T =size(data,1) / eI.inputDim;
     % store hidden unit activations at each time instant
     hAct = cell(numel(eI.layerSizes)-1, T);
     for t = 1:T
+	%t
         %% forward prop all hidden layers
         for l = 1:numel(eI.layerSizes)-1
             if l == 1
@@ -161,6 +164,8 @@ for c = 1:numel(data_cell)
       trueLabels = targets(t,:);
       num_samples = size(trueLabels,2);
 
+      %disp 'trueLabels:';
+      %disp(trueLabels);
       groundTruth = sparse(trueLabels, 1:num_samples, 1, eI.layerSizes(end), num_samples);
     %  if eI.useGpu
 	%groundTruth = gsingle(full(groundTruth));
