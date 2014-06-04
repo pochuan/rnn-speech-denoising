@@ -15,6 +15,7 @@ addpath(genpath(minFuncDir));
 eI = [];
 % dimension of each input frame
 eI.featDim = 14;
+eI.outputDim = 1;
 eI.dropout = 0;
 % context window size of the input.
 eI.winSize = 3;
@@ -22,7 +23,7 @@ eI.winSize = 3;
 % if you want tied weights, must have odd number of *hidden* layers
 eI.tieWeights = 0;
 % 2 hidden layers and output layer
-eI.layerSizes = [512 eI.featDim];
+eI.layerSizes = [512 eI.outputDim];
 % highest hidden layer is temporal
 eI.temporalLayer = 0;
 % dim of network input at each timestep (final size after window & whiten)
