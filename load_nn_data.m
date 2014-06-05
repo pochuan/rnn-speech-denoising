@@ -16,7 +16,7 @@ function [ data_cell, target_cell ]  = load_nn_data(dir, file_num, feat_dim, M, 
   [f, utt_dat, a] = load_kaldi_data(dir,file_num,feat_dim);
 
   [nframes , nfeats] = size(f);
-  [nframes2, nlabels] = size(a);
+  [nframes2, labeldim] = size(a);
 
   %f = repmat((1:nframes)', 1, nfeats);
   %[nframes , nfeats] = size(f);
@@ -25,7 +25,7 @@ function [ data_cell, target_cell ]  = load_nn_data(dir, file_num, feat_dim, M, 
   a = uint32(a);
 
   assert(nframes == nframes2);
-  assert(nlabels == eI.outputDim);
+  assert(labeldim == eI.labelDim);
   assert(nfeats == eI.featDim);
 
   %disp(size(f))
@@ -65,7 +65,7 @@ function [ data_cell, target_cell ]  = load_nn_data(dir, file_num, feat_dim, M, 
   target_cell = cell(1,length(eI.seqLen));
   for i=length(eI.seqLen):-1:1
     data_cell{i} = zeros(eI.inputDim*eI.seqLen(i),seqLenSizes(i));
-    target_cell{i} = zeros(eI.outputDim*eI.seqLen(i),seqLenSizes(i));
+    target_cell{i} = zeros(eI.labelDim*eI.seqLen(i),seqLenSizes(i));
   end
 
 
