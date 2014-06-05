@@ -53,7 +53,8 @@ end;
 
 %% setup weights and accumulators
 [stack, W_t] = rnn_params2stack(theta, eI);
-cost = 0; numTotal = 0;
+cost = 0; numTotal = 0; totalNumCorrect = 0;
+
 outputDim = eI.layerSizes(end);
 %% setup structures to aggregate gradients
 stackGrad = cell(1,numel(eI.layerSizes));
@@ -158,7 +159,7 @@ for c = 1:numel(data_cell)
       %% 	return;
       %% end;
 
-      if pred_out, uttPred = [predProbs uttPred]; end;
+      if pred_out, uttPred = [predProbs; uttPred]; end;
       % skip loss computation if no targets given
       if isempty(targets), continue; end;
       trueLabels = targets(t,:);
@@ -175,14 +176,20 @@ for c = 1:numel(data_cell)
       % accList = [accList; mean(pred'==curLabels)];
       % numExList = [numExList; m];
       numCorrect = double(sum(predLabels==trueLabels));
-      
+      totalNumCorrect = totalNumCorrect + numCorrect;
+
+      %predLabels
+      %trueLabels
+      %numCorrect
+
       %% compute cost
       cost = (-1/num_samples) * nansum(nansum(log(predProbs) .* (groundTruth)));
+      %full(cost)
 
       %% compute gradient for SM layer
       delta =  predProbs-groundTruth;
-      stackGrad{end}.W = stackGrad{end}.W + (1/num_samples)*delta*hAct{l-1,t}';
-      stackGrad{end}.b = stackGrad{end}.b + (1/num_samples)*sum(delta, 2);
+      stackGrad{end}.W = stackGrad{end}.W + (1/num_samples) * delta*hAct{l-1,t}';
+      stackGrad{end}.b = stackGrad{end}.b + (1/num_samples) * sum(delta, 2);
       % prop error through SM layer
       delta = stack{end}.W'*delta;
       
@@ -246,6 +253,9 @@ grad = grad + 2 * numTotal * eI.lambda * theta;
 avCost = cost/numTotal;
 avWCost = wCost/numTotal;
 cost = cost + wCost;
+
+numTotal
+totalNumCorrect
 
 %% print output
 if ~isSlave && ~isempty(targets_cell)
