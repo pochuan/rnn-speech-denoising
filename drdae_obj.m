@@ -158,7 +158,7 @@ for c = 1:numel(data_cell)
       %% 	return;
       %% end;
 
-      if pred_out, uttPred = [predProbs; uttPred]; end;
+      if pred_out, uttPred = [predProbs uttPred]; end;
       % skip loss computation if no targets given
       if isempty(targets), continue; end;
       trueLabels = targets(t,:);

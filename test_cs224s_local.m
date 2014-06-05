@@ -56,12 +56,6 @@ eI.featInBase =baseDir; % '/afs/cs.stanford.edu/u/amaas/scratch/aurora2/features
 %% load data
 eI.useCache = 0;
 
-%Get SNR List
-snrList = {'clean1', 'N1_SNR5', 'N1_SNR10', 'N1_SNR15', 'N1_SNR20', ...
-'clean2', 'N2_SNR5', 'N2_SNR10', 'N2_SNR15', 'N2_SNR20', ...
-'clean3', 'N3_SNR5', 'N3_SNR10', 'N3_SNR15', 'N3_SNR20', };
-eI.subdirs = snrList;
-
 % number of utterances to use
 M=3;
 dir='/home/mkayser/school/classes/2013_14_spring/cs224s/project/rnn-speech-denoising/data/output/';
@@ -70,16 +64,12 @@ feat_dim=13;
 
 [data_cell, targets_cell] = load_nn_data(dir, file_num, feat_dim, M, eI);
 
-% dieplay mean as a whitening debug check
-%disp(mean(data_cell{1},2));
-%% setup minFunc
-options.Diagnostics = 'on';
-options.Display = 'iter';
-options.MaxIter = 2000;
-options.MaxFunEvals = 2500;
-options.Corr = 50;
-options.DerivativeCheck = 'on';
-%options.DerivativeCheck = 'off';
-% options.outputFcn = @save_callback;
-%% run optimizer
-minFunc(@drdae_obj, theta, options, eI, data_cell, targets_cell, false, false);
+% drdae prototype
+%[cost, grad, numTotal, pred_cell ] = drdae_obj( theta, eI, data_cell, targets_cell, fprop_only, pred_out)
+% if pred_out is true, pred_cell is a cell array of the number of time series containing
+% matrix of posteriors for each frame in that time series
+[cost, grad, numTotal, pred_cell ] = drdae_obj( theta, eI, data_cell, targets_cell, true,true)
+
+
+
+
