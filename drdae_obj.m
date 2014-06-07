@@ -183,13 +183,16 @@ for c = 1:numel(data_cell)
       %numCorrect
 
       %% compute cost
-      cost = (-1/num_samples) * nansum(nansum(log(predProbs) .* (groundTruth)));
+      cost = (-1) * nansum(nansum(log(predProbs) .* (groundTruth)));
+      %cost = (-1/num_samples) * nansum(nansum(log(predProbs) .* (groundTruth)));
       %full(cost)
 
       %% compute gradient for SM layer
       delta =  predProbs-groundTruth;
-      stackGrad{end}.W = stackGrad{end}.W + (1/num_samples) * delta*hAct{l-1,t}';
-      stackGrad{end}.b = stackGrad{end}.b + (1/num_samples) * sum(delta, 2);
+      stackGrad{end}.W = stackGrad{end}.W + delta*hAct{l-1,t}';
+      stackGrad{end}.b = stackGrad{end}.b + sum(delta, 2);
+      %stackGrad{end}.W = stackGrad{end}.W + (1/num_samples) * delta*hAct{l-1,t}';
+      %stackGrad{end}.b = stackGrad{end}.b + (1/num_samples) * sum(delta, 2);
       % prop error through SM layer
       delta = stack{end}.W'*delta;
       
