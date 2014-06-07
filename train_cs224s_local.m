@@ -40,20 +40,30 @@ eI.temporalInit = 'rand';
 eI.lambda = 0;
 %% setup weight caching
 saveDir = './models';
-eI.saveDir = [saveDir '/test'];
+eI.saveDir = [saveDir '/TIMIT_full/restart']; % DO NOT END PATH WITH "/"
+%eI.saveDir = [saveDir '/TIMIT_full/sixth'];
 mkdir(eI.saveDir);
-%% initialize weights
-[stack_i, W_t_i] = initialize_weights(eI);
-[theta] = rnn_stack2params(stack_i, eI, W_t_i);
 
-[stack_new, W_t_new] = rnn_params2stack(theta,eI);
-[theta_new] = rnn_stack2params(stack_new, eI, W_t_new);
+%%%%%%%%%%%%%%%%%%%%%
+%% initialize weights
+% Fresh start
+%[stack_i, W_t_i] = initialize_weights(eI);
+%[theta] = rnn_stack2params(stack_i, eI, W_t_i);
+
+%[stack_new, W_t_new] = rnn_params2stack(theta,eI);
+%[theta_new] = rnn_stack2params(stack_new, eI, W_t_new);
+
+%%%%%%%%%
+% Restart training from previous model
+load('./models/TIMIT_full/second/model_14.mat');
+
+%%%%%%%%%%%%%%%%%%%%
 
 %% load data
 eI.useCache = 0;
 
-% number of utterances to use
-M=3;
+% number of utterances to use, To run on full dataset, set M = -1
+M=-1;
 dir='./data/output/';
 %dir='/home/mkayser/school/classes/2013_14_spring/cs224s/project/rnn-speech-denoising/data/output/';
 file_num=1;

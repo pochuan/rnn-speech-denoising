@@ -15,7 +15,8 @@ state = p2; % appears to be internal state of minFunc, can be 'init', 'iter', or
 iter = p3 % this appears to be the iteration 
 eI = varargin{1};
 
-if ((mod(iter, 10) == 0) && strcmp(state, 'iter')) 
+if (strcmp(state, 'iter')) 
+%if ((mod(iter, 2) == 0) && strcmp(state, 'iter')) 
     if isfield(eI, 'iterStart')
       iter = iter +eI.iterStart;
     end
