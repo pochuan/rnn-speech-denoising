@@ -1,67 +1,35 @@
 % script to specify network arch and train drdae on single machine
 % make copies of this script for each architecture you want to try
 
-%% setup paths for code. assumed this script runs in its own directory
-codeDir = '.';
-%minFuncDir = '/home/mkayser/school/classes/2013_14_spring/cs224s/project/other-resources/minFunc_2012';
-minFuncDir = '/afs/ir.stanford.edu/users/p/o/pochuan/cs224s/project/minFunc_2012';
-baseDir = '../scratch/';
+paths = load_global_paths();
 
-%% add paths
-addpath(codeDir);
-addpath(genpath(minFuncDir));
+addpath('.');
+addpath(genpath(paths.minFuncDir));
+addpath(paths.stanfordNNetUtilDir);
 
-%% setup network architecture
-eI = [];
-% dimension of each input frame
-eI.featDim = 13;
-eI.labelDim = 1;
-eI.labelSetSize = 234;
-eI.dropout = 0;
-% context window size of the input.
-eI.winSize = 3;
-% weight tying in hidden layers
-% if you want tied weights, must have odd number of *hidden* layers
-eI.tieWeights = 0;
-% hidden layers and output layer
-eI.layerSizes = [512 eI.labelSetSize];
-% highest hidden layer is temporal
-eI.temporalLayer = 0;
-% dim of network input at each timestep (final size after window & whiten)
-eI.inputDim = eI.featDim * eI.winSize;
-% length of input sequence chunks.
-% eI.seqLen = [1 10 25 50 100];
-eI.seqLen = [1 50 100];
-% activation function
-eI.activationFn = 'tanh';
-% temporal initialization type
-eI.temporalInit = 'rand';
-% weight norm penaly
-eI.lambda = 0;
-%% setup weight caching
-saveDir = './models';
-eI.saveDir = [saveDir '/test'];
+eI = default_model_settings();
+
+% Where to save models to
+eI.saveDir = paths.modelDir;
 mkdir(eI.saveDir);
+
 %% initialize weights
 [stack_i, W_t_i] = initialize_weights(eI);
 [theta] = rnn_stack2params(stack_i, eI, W_t_i);
 
-[stack_new, W_t_new] = rnn_params2stack(theta,eI);
-[theta_new] = rnn_stack2params(stack_new, eI, W_t_new);
+% MRK: These two lines are very weird -- we just load the model again into variables we don't ever appear to use. 
+% I'm testing whether we can just comment them out.
+%[stack_new, W_t_new] = rnn_params2stack(theta,eI);
+%[theta_new] = rnn_stack2params(stack_new, eI, W_t_new);
 
-%% load data
-eI.useCache = 0;
 
-% number of utterances to use
-M=3;
-dir='./data/output/';
-%dir='/home/mkayser/school/classes/2013_14_spring/cs224s/project/rnn-speech-denoising/data/output/';
+% number of utterances to use.
+% You can set this to -1 and it will use all training utterances.
+% Setting to some low positive number especially helps when testing the code.
+num_training_utterances=3;
 file_num=1;
-feat_dim=13;
 
-[data_cell, targets_cell] = load_nn_data(dir, file_num, feat_dim, M, eI);
-%data_cell{1} = rand(eI.inputDim*50,4);
-%targets_cell{1} = rand(eI.featDim*50,4);
+[data_cell, targets_cell] = load_nn_data(paths.trainingDataDir, file_num, eI.featDim, num_training_utterances, eI, true);
 
 %% setup minFunc
 options.Diagnostics = 'on';
@@ -69,8 +37,7 @@ options.Display = 'iter';
 options.MaxIter = 2000;
 options.MaxFunEvals = 2500;
 options.Corr = 50;
-%options.DerivativeCheck = 'on';
 options.DerivativeCheck = 'off';
-options.outputFcn = @save_callback;
+% options.outputFcn = @save_callback;
 %% run optimizer
 minFunc(@drdae_obj, theta, options, eI, data_cell, targets_cell, false, false);

@@ -257,12 +257,13 @@ avCost = cost/numTotal;
 avWCost = wCost/numTotal;
 cost = cost + wCost;
 
-numTotal
-totalNumCorrect
+%numTotal
+%totalNumCorrect
+pctCorrect = 100*totalNumCorrect/numTotal;
 
 %% print output
 if ~isSlave && ~isempty(targets_cell)
-    fprintf('loss:  %f  wCost:  %f \t',full(avCost), avWCost);
+    fprintf('pctCorrect: %f  loss:  %f  wCost:  %f \t', pctCorrect, full(avCost), avWCost);
     fprintf('wNorm: %f  rNorm: %f  oNorm: %f\n',sum(stack{1}.W(:).^2),...
         sum(W_t(:).^2), sum(stack{end}.W(:).^2));
 % plot(theta,'kx');drawnow;
