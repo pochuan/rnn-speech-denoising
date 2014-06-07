@@ -23,10 +23,42 @@ eI.winSize = 3;
 % weight tying in hidden layers
 % if you want tied weights, must have odd number of *hidden* layers
 eI.tieWeights = 0;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Different Experiments
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 1 hidden layer, non-recurrent
 % hidden layers and output layer
-eI.layerSizes = [512 eI.labelSetSize];
+%eI.layerSizes = [512 eI.labelSetSize];
 % highest hidden layer is temporal
-eI.temporalLayer = 0;
+%eI.temporalLayer = 0;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 2 hidden layers, non-recurrent:
+%eI.layerSizes = [512 512 eI.labelSetSize];
+%eI.temporalLayer = 0;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 1 hidden layer, recurrent:
+%eI.layerSizes = [512 eI.labelSetSize];
+%eI.temporalLayer = 1;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 2 hidden layers, recurrent:
+%eI.layerSizes = [512 512 eI.labelSetSize];
+%eI.temporalLayer = 1;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 3 hidden layer, non-recurrent:
+%eI.layerSizes = [512 512 512 eI.labelSetSize];
+%eI.temporalLayer = 0;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 3 hidden layers, recurrent:
+eI.layerSizes = [512 512 512 eI.labelSetSize];
+eI.temporalLayer = 1;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % dim of network input at each timestep (final size after window & whiten)
 eI.inputDim = eI.featDim * eI.winSize;
 % length of input sequence chunks.
@@ -40,22 +72,22 @@ eI.temporalInit = 'rand';
 eI.lambda = 0;
 %% setup weight caching
 saveDir = './models';
-eI.saveDir = [saveDir '/TIMIT_full/restart']; % DO NOT END PATH WITH "/"
+eI.saveDir = [saveDir '/TIMIT_full/recur_3hid/second']; % DO NOT END PATH WITH "/"
 %eI.saveDir = [saveDir '/TIMIT_full/sixth'];
 mkdir(eI.saveDir);
 
 %%%%%%%%%%%%%%%%%%%%%
 %% initialize weights
 % Fresh start
-%[stack_i, W_t_i] = initialize_weights(eI);
-%[theta] = rnn_stack2params(stack_i, eI, W_t_i);
+[stack_i, W_t_i] = initialize_weights(eI);
+[theta] = rnn_stack2params(stack_i, eI, W_t_i);
 
 %[stack_new, W_t_new] = rnn_params2stack(theta,eI);
 %[theta_new] = rnn_stack2params(stack_new, eI, W_t_new);
 
 %%%%%%%%%
 % Restart training from previous model
-load('./models/TIMIT_full/second/model_14.mat');
+%load('./models/TIMIT_full/forth/model_12.mat', 'theta');
 
 %%%%%%%%%%%%%%%%%%%%
 
