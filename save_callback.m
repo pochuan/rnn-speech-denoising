@@ -12,10 +12,10 @@ function [ stop ] = save_callback( p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, vara
 % save model while minfunc is running
 theta = p1;
 state = p2; % appears to be internal state of minFunc, can be 'init', 'iter', or 'done'
-iter = p3; % this appears to be the iteration 
+iter = p3 % this appears to be the iteration 
 eI = varargin{1};
 
-if mod(iter, 50) == 0    
+if ((mod(iter, 10) == 0) && strcmp(state, 'iter')) 
     if isfield(eI, 'iterStart')
       iter = iter +eI.iterStart;
     end
