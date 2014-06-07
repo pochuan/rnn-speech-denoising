@@ -5,6 +5,11 @@
 codeDir = '.';
 minFuncDir = '/home/mkayser/school/classes/2013_14_spring/cs224s/project/other-resources/minFunc_2012';
 baseDir = '../scratch/';
+%%%%%%%%%%%%%%%%%%%%%
+% Log likelihood output file directory
+outputDir = '../likelihoods/';
+%%%%%%%%%%%%%%%%%%%%%%
+
 %% AMAAS setup
 %codeDir = '/afs/cs.stanford.edu/u/amaas/scratch/audio/audio_repo/matlab_wd/drdae';
 %% add paths
@@ -62,7 +67,7 @@ dir='/home/mkayser/school/classes/2013_14_spring/cs224s/project/rnn-speech-denoi
 file_num=1;
 feat_dim=13;
 
-[data_cell, targets_cell] = load_nn_data(dir, file_num, feat_dim, M, eI);
+[data_cell, targets_cell, utt_dat] = load_nn_data(dir, file_num, feat_dim, M, eI);
 
 % drdae prototype
 %[cost, grad, numTotal, pred_cell ] = drdae_obj( theta, eI, data_cell, targets_cell, fprop_only, pred_out)
@@ -70,6 +75,59 @@ feat_dim=13;
 % matrix of posteriors for each frame in that time series
 [cost, grad, numTotal, pred_cell ] = drdae_obj( theta, eI, data_cell, targets_cell, true,true)
 
+% Add priors, I dont know where we get our priors...
+% loglikelihood = bsxfun(@plus, log(pred_cell), priors);
 
+%%%%%%%%%%%%%%
+% Write likelihoods from pred_cell to Kaldi file format
+%%%%%%%%%%%%%%
+fid = fopen(outputDir, 'w');
 
+numUtts = length(utt_dat.keys);
+
+chunkSize = 100; %Size of utterance chunks to forward prop at a time
+numChunks = ceil(numUtts/chunkSize);
+numFramesDone = 0; %Number of total frames written
+numUttsDone = 0; %Number of utterances written
+
+for i=1:numChunks
+    %Get subset of keys and subset of sizes to forward prop and write
+    if i==numChunks
+        subKeys=utt_dat.keys((i-1)*chunkSize+1:end);
+        subSizes=utt_dat.sizes((i-1)*chunkSize+1:end,:);
+    else
+        subKeys=utt_dat.keys((i-1)*chunkSize+1:i*chunkSize);
+        subSizes=utt_dat.sizes((i-1)*chunkSize+1:i*chunkSize);
+    end
+
+    %input = feats(numFramesDone+1:numFramesDone+sum(subSizes),:);
+    %Forward prop data in cost function
+    %[c, g, nC, nE, ceC, wC, output] = spNetCostSlave(theta,eI,input',[],1);
+
+    %take log of forward propped dat and add log inverse priors
+    %output = bsxfun(@plus,log(output'),priors);
+
+    %Write each utterance separately so we can write as key value pairs
+    numFramesWrit = 0;
+    for u=1:length(subKeys)
+        uttSize = subSizes(u);
+        FLOATSIZE=4;
+        %write each key with corresponding nnet value
+        fprintf(fid,'%s ',subKeys{u}); % write key
+        fprintf(fid,'%cBFM ',char(0)); % write Kaldi header
+        fwrite(fid,FLOATSIZE,'integer*1'); %write size of float as 1
+        %byte int
+        fwrite(fid,uttSize,'int'); % write number rows
+        fwrite(fid,FLOATSIZE,'integer*1'); %write size of float as 1
+        %byte int
+        fwrite(fid,numStates,'int');  % write number cols
+
+        % write full utterance (have to transpose as fwrite is column order
+        fwrite(fid,output(numFramesWrit+1:numFramesWrit+uttSize,:)', 'float');
+        numFramesWrit = numFramesWrit+uttSize;
+    end
+    numUttsDone = numUttsDone+length(subKeys);
+    numFramesDone = numFramesDone+sum(subSizes);
+end
+fclose(fid);
 

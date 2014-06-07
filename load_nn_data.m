@@ -1,4 +1,4 @@
-function [ data_cell, target_cell ]  = load_nn_data(dir, file_num, feat_dim, M, eI)
+function [ data_cell, target_cell, utt_dat]  = load_nn_data(dir, file_num, feat_dim, M, eI)
   % M: Number of sample files to use. value < 0 loads all
   % eI.winSize: Size of window
   % eI.seqLen: unique lengths (in ascending order) 
