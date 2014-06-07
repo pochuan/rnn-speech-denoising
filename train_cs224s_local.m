@@ -3,7 +3,8 @@
 
 %% setup paths for code. assumed this script runs in its own directory
 codeDir = '.';
-minFuncDir = '/home/mkayser/school/classes/2013_14_spring/cs224s/project/other-resources/minFunc_2012';
+%minFuncDir = '/home/mkayser/school/classes/2013_14_spring/cs224s/project/other-resources/minFunc_2012';
+minFuncDir = '/afs/ir.stanford.edu/users/p/o/pochuan/cs224s/project/minFunc_2012';
 baseDir = '../scratch/';
 
 %% add paths
@@ -53,11 +54,14 @@ eI.useCache = 0;
 
 % number of utterances to use
 M=3;
-dir='/home/mkayser/school/classes/2013_14_spring/cs224s/project/rnn-speech-denoising/data/output/';
+dir='./data/output/';
+%dir='/home/mkayser/school/classes/2013_14_spring/cs224s/project/rnn-speech-denoising/data/output/';
 file_num=1;
 feat_dim=13;
 
 [data_cell, targets_cell] = load_nn_data(dir, file_num, feat_dim, M, eI);
+%data_cell{1} = rand(eI.inputDim*50,4);
+%targets_cell{1} = rand(eI.featDim*50,4);
 
 %% setup minFunc
 options.Diagnostics = 'on';
@@ -65,8 +69,8 @@ options.Display = 'iter';
 options.MaxIter = 2000;
 options.MaxFunEvals = 2500;
 options.Corr = 50;
-options.DerivativeCheck = 'on';
-%options.DerivativeCheck = 'off';
-% options.outputFcn = @save_callback;
+%options.DerivativeCheck = 'on';
+options.DerivativeCheck = 'off';
+options.outputFcn = @save_callback;
 %% run optimizer
 minFunc(@drdae_obj, theta, options, eI, data_cell, targets_cell, false, false);

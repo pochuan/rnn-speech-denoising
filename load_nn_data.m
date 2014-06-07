@@ -9,8 +9,9 @@ function [ data_cell, target_cell, utt_dat]  = load_nn_data(dir, file_num, feat_
   % data_cell: noisy data. cell array of different training lengths. 
   % target_cell: clean data. cell array of different training lengths.
 	 
-  addpath('/home/mkayser/school/classes/2013_14_spring/cs224s/project/other-resources/kaldi-stanford-master/stanford-nnet/util');
 
+  %addpath('/home/mkayser/school/classes/2013_14_spring/cs224s/project/other-resources/kaldi-stanford-master/stanford-nnet/util');
+  addpath('/afs/ir.stanford.edu/users/p/o/pochuan/cs224s/project/kaldi-stanford-master/stanford-nnet/util');
 	 
 	 
   [f, utt_dat, a] = load_kaldi_data(dir,file_num,feat_dim);
@@ -125,15 +126,16 @@ function [ data_cell, target_cell, utt_dat]  = load_nn_data(dir, file_num, feat_
       % trim for next iteration
       T = T-binLen;
       if T > 0
-	fwindows = fwindows(:,(binLen+1):end);
-	adata = adata(:,(binLen+1):end);
+	    fwindows = fwindows(:,(binLen+1):end);
+	    adata = adata(:,(binLen+1):end);
       end;
     end;
   end;
 
   %seqLenPositions
   %seqLenSizes
-  assert(seqLenPositions == seqLenSizes+1);
+
+  %assert(seqLenPositions == seqLenSizes+1);
 
   %for j=1:length(data_cell)
   %    disp(size(data_cell{j}));
@@ -145,8 +147,5 @@ function [ data_cell, target_cell, utt_dat]  = load_nn_data(dir, file_num, feat_
   %save(sprintf('data/data.%d',eI.seqLen(1)), 'a', '-ascii');
   %save(sprintf('data/data.%d',eI.seqLen(2)), 'b', '-ascii');
   %save(sprintf('data/data.%d',eI.seqLen(3)), 'c', '-ascii');
-end;
 
-
-
-
+%end;
