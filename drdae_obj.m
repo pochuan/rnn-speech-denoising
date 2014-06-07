@@ -183,13 +183,13 @@ for c = 1:numel(data_cell)
       %numCorrect
 
       %% compute cost
-      cost = (-1/num_samples) * nansum(nansum(log(predProbs) .* (groundTruth)));
+      cost = -1 * nansum(nansum(log(predProbs) .* (groundTruth)));
       %full(cost)
 
       %% compute gradient for SM layer
       delta =  predProbs-groundTruth;
-      stackGrad{end}.W = stackGrad{end}.W + (1/num_samples) * delta*hAct{l-1,t}';
-      stackGrad{end}.b = stackGrad{end}.b + (1/num_samples) * sum(delta, 2);
+      stackGrad{end}.W = stackGrad{end}.W + delta*hAct{l-1,t}';
+      stackGrad{end}.b = stackGrad{end}.b + sum(delta, 2);
       % prop error through SM layer
       delta = stack{end}.W'*delta;
       
@@ -254,12 +254,13 @@ avCost = cost/numTotal;
 avWCost = wCost/numTotal;
 cost = cost + wCost;
 
-numTotal
-totalNumCorrect
+%numTotal
+%totalNumCorrect
+pctCorrect = 100*totalNumCorrect/numTotal;
 
 %% print output
 if ~isSlave && ~isempty(targets_cell)
-    fprintf('loss:  %f  wCost:  %f \t',full(avCost), avWCost);
+    fprintf('pctCorrect: %f  loss:  %f  wCost:  %f \t', pctCorrect, full(avCost), avWCost);
     fprintf('wNorm: %f  rNorm: %f  oNorm: %f\n',sum(stack{1}.W(:).^2),...
         sum(W_t(:).^2), sum(stack{end}.W(:).^2));
 % plot(theta,'kx');drawnow;
