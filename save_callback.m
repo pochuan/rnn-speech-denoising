@@ -1,12 +1,32 @@
-function [ stop ] = save_callback( theta, info, state, eI, varargin)
-% save model while minfunc is running
+function [ stop ] = save_callback( p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, varargin)
+% The newest version of minfunc updated the callback calling pattern
+% Looking at minFunc.m it is called by in line 365
+%    stop = outputFcn(x,'init',0,funEvals,f,[],[],g,[],max(abs(g)),varargin{:});
+% x is theta
+% funEvals is apparently just always 1
+% f is "cost" as returned by drdae_obj
+% g is "grad" as returned by drdae_obj
+% varargin are the parameters passed into minFunc after 'options'
+%   which in our case are eI, data_cell, target_cell, 0, 0
 
-if mod(info.iteration, 50) == 0    
+% save model while minfunc is running
+theta = p1;
+state = p2; % appears to be internal state of minFunc, can be 'init', 'iter', or 'done'
+iter = p3; % this appears to be the iteration 
+eI = varargin{1};
+
+if mod(iter, 50) == 0    
     if isfield(eI, 'iterStart')
-      info.iteration = info.iteration+eI.iterStart;
+      iter = iter +eI.iterStart;
     end
-    saveName = sprintf('%smodel_%d.mat',eI.saveDir,info.iteration)
-    save(saveName, 'theta', 'eI',  'info');
+
+    % write theta
+    %thetaPath = sprintf('%s/theta_%d.csv',eI.saveDir,iter);
+    %dlmwrite(thetaPath,theta);
+
+    % Save as .mat
+    saveName = sprintf('%s/model_%d.mat',eI.saveDir,iter)
+    save(saveName, 'theta', 'eI');
 end;
 
 stop = 0;
