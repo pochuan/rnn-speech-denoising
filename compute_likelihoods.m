@@ -10,8 +10,8 @@ function [ ]  = compute_likelihoods(model_name, model_iter_num, test_input_dir, 
   addpath(paths.stanfordNNetUtilDir);
 
   
-  model_file       = sprintf('%s/%s_%d'    , paths.modelDir, model_name, model_iter_num);
-  likelihoods_file = sprintf('%s/%s.ark', paths.likelihoodsDir, test_set_name);
+  model_file       = sprintf('%s/%s_%d.mat', paths.modelDir, model_name, model_iter_num);
+  likelihoods_file = sprintf('%s/%s.ark'   , paths.likelihoodsDir, test_set_name);
   
   load(model_file, 'theta','eI');
   eI.labelSetSize = 117;

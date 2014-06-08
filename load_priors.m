@@ -14,9 +14,7 @@ function [ priors ]  = load_priors(dir, file_num, feat_dim, label_set_size)
   end;
   
   priors = count_a / nframes;
-
-  
-end;
+%end;
 
 
 

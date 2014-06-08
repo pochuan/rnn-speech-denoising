@@ -55,6 +55,6 @@ function [] = run_experiment(id_to_run)
   end;
 
   output = train_nn(eI, num_training_files); 
-  compute_likelihoods(eI, output.iterations, paths.testDataDir, num_testing_files);
+  compute_likelihoods(eI.modelName, output.iterations, paths.testDataDir, num_testing_files);
 %end;
   

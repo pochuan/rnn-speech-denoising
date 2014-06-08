@@ -167,7 +167,9 @@ function [ cost, grad, numTotal, pred_cell ] = drdae_obj( theta, eI, data_cell, 
 
       %disp 'trueLabels:';
       %disp(trueLabels);
-      groundTruth = sparse(trueLabels, 1:num_samples, 1, eI.layerSizes(end), num_samples);
+      % It's very odd that we need the double typecast on trueLabels, but it 
+      % seems necessary in matlab
+      groundTruth = sparse(double(trueLabels), 1:num_samples, 1, eI.layerSizes(end), num_samples);
       %  if eI.useGpu
       %groundTruth = gsingle(full(groundTruth));
       %  end;
