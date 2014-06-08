@@ -7,15 +7,19 @@ addpath(paths.stanfordNNetUtilDir);
 
 mkdir(paths.modelDir);
 
-%%% modify stuff down here 
-
-% 1 layer non-recursive
+% Generic model
 eI = default_model_settings();
 eI.saveDir = paths.modelDir;
-eI.modelName = '1layer_normal';
-tic; output = train_nn(eI, 2); time=toc
-%tic; train_nn(eI, 10); time=toc
-%tic; train_nn(eI, 15); time=toc
 
-compute_likelihoods(eI.modelName, output.iterations, paths.testDataDir, 1);
+%%% modify stuff down here 
+num_training_files = 10;
+
+% 1 layer non-recursive
+eI.modelName = '1layer_normal';
+eI.lambda=0;
+tic; 
+output = train_nn(eI, num_training_files); 
+compute_likelihoods(eI.modelName, output.iterations, paths.testDataDir, 10);
+toc
+
 

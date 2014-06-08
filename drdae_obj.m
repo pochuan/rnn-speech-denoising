@@ -179,7 +179,7 @@ function [ cost, grad, numTotal, pred_cell ] = drdae_obj( theta, eI, data_cell, 
       totalNumCorrect = totalNumCorrect + numCorrect;
 
       %% compute cost
-      cost = (-1) * nansum(nansum(log(predProbs) .* (groundTruth)));
+      cost = cost + ((-1) * nansum(nansum(log(predProbs) .* (groundTruth))));
       %cost = (-1/num_samples) * nansum(nansum(log(predProbs) .* (groundTruth)));
 
       %% compute gradient for SM layer
