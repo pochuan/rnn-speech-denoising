@@ -3,6 +3,7 @@ function [ paths ]  = load_global_paths()
   % Change this if necessary
   % Better yet, just create a nnet subdir of your rnn-speech-denoising
   % directory, and populate with symlinks to the relevant locations below
+  % modelDir and likelihoodsDir should probably just be created
   paths = [];
   paths.rootDir='./nnet/';
 
