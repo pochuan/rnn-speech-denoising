@@ -12,13 +12,13 @@ function [ data_cell, target_cell, utt_dat]  = load_nn_data(dir, file_num, feat_
   addpath('/home/mkayser/school/classes/2013_14_spring/cs224s/project/other-resources/kaldi-stanford-master/stanford-nnet/util');
 
 	 
-	 
-  [fdata, utt_dat, adata] = load_kaldi_data(dir,file_num,feat_dim);
+  
+  [fdata, utt_dat, adata] = load_kaldi_data([dir,'/'],file_num,feat_dim);
 
   [nframes , nfeats] = size(fdata);
   [nframes2, labeldim] = size(adata);
 
-  adata = uint32(a);
+  adata = uint32(adata);
 
   assert(~train_mode || nframes == nframes2);
   assert(~train_mode || labeldim == eI.labelDim);
@@ -63,6 +63,10 @@ function [ data_cell, target_cell, utt_dat]  = load_nn_data(dir, file_num, feat_
       data_cell{i} = zeros(eI.inputDim*eI.seqLen(i),seqLenSizes(i));
       target_cell{i} = zeros(eI.labelDim*eI.seqLen(i),seqLenSizes(i));
     end
+  else
+      % Test mode.
+      data_cell = cell(1, 0);
+      target_cell = cell(1, 0);
   end;
 
   % I guess this is a way to remember the current number of samples of
@@ -118,7 +122,7 @@ function [ data_cell, target_cell, utt_dat]  = load_nn_data(dir, file_num, feat_
     else
 	% test mode. no chopping, just put entire utterance into new cell of data_cell.
 	% Also, there may be no alignments at all
-	c = size(data_cell,1)+1;
+	c = numel(data_cell)+1;
 	data_cell{c} = reshape(utt_fwindows, [], 1);
 	if ~isempty(utt_adata) 
 	  target_cell{c} = reshape(utt_adata, [], 1);
@@ -126,7 +130,10 @@ function [ data_cell, target_cell, utt_dat]  = load_nn_data(dir, file_num, feat_
     end;
   end;
 
-  assert(seqLenPositions == seqLenSizes+1);
+  if(train_mode) 
+    assert(seqLenPositions == seqLenSizes+1);
+  end;
+
 
 end;
 

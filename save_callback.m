@@ -15,7 +15,7 @@ state = p2; % appears to be internal state of minFunc, can be 'init', 'iter', or
 iter = p3 % this appears to be the iteration 
 eI = varargin{1};
 
-if ((mod(iter, 10) == 0) && strcmp(state, 'iter')) 
+if ((mod(iter, 1) == 0) && strcmp(state, 'iter')) 
     if isfield(eI, 'iterStart')
       iter = iter +eI.iterStart;
     end
@@ -25,7 +25,7 @@ if ((mod(iter, 10) == 0) && strcmp(state, 'iter'))
     %dlmwrite(thetaPath,theta);
 
     % Save as .mat
-    saveName = sprintf('%s/model_%d.mat',eI.saveDir,iter)
+    saveName = sprintf('%s/%s_%d.mat', eI.saveDir, eI.modelName, iter);
     save(saveName, 'theta', 'eI');
 end;
 

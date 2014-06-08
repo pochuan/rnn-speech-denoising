@@ -11,8 +11,8 @@ function [ paths ]  = load_global_paths()
   paths.stanfordNNetUtilDir = sprintf('%s/stanford-nnet/util', paths.rootDir);
   
   %annoyingly the trailing slash is currently necessary
-  paths.trainingDataDir     = sprintf('%s/training/', paths.rootDir); 
-  paths.testDataDir         = sprintf('%s/test/', paths.rootDir); 
-  paths.outputDir           = sprintf('%s/likelihoods/', paths.rootDir);
+  paths.trainingDataDir     = sprintf('%s/training', paths.rootDir); 
+  paths.testDataDir         = sprintf('%s/test', paths.rootDir); 
+  paths.likelihoodsDir      = sprintf('%s/likelihoods/', paths.rootDir);
   paths.modelDir            = sprintf('%s/models', paths.rootDir);
 end;

@@ -1,9 +1,11 @@
 function [ eI ]  = default_model_settings()
+  % Settings for non-recurrent, shallow (1 hidden layer) neural network
+
   eI = [];
   % dimension of each input frame
   eI.featDim = 13;
   eI.labelDim = 1;
-  eI.labelSetSize = 234;
+  eI.labelSetSize = 117;
   eI.dropout = 0;
   % context window size of the input.
   eI.winSize = 3;
