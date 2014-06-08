@@ -24,39 +24,48 @@ eI.winSize = 3;
 % if you want tied weights, must have odd number of *hidden* layers
 eI.tieWeights = 0;
 
+%% setup weight caching
+saveDir = './models';
+%eI.saveDir = [saveDir '/TIMIT_full/recur_3hid/first']; % DO NOT END PATH WITH "/"
+%eI.saveDir = [saveDir '/TIMIT_full/sixth'];
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Different Experiments
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 1 hidden layer, non-recurrent
-% hidden layers and output layer
-%eI.layerSizes = [512 eI.labelSetSize];
-% highest hidden layer is temporal
-%eI.temporalLayer = 0;
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 2 hidden layers, non-recurrent:
-%eI.layerSizes = [512 512 eI.labelSetSize];
-%eI.temporalLayer = 0;
+%eI.layerSizes = [512 eI.labelSetSize]; % hidden layers and output layer
+%eI.temporalLayer = 0; % highest hidden layer is temporal
+%eI.saveDir = [saveDir '/TIMIT_full/nonrecur_1hid/forth']; % DO NOT END PATH WITH "/"
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 1 hidden layer, recurrent:
 %eI.layerSizes = [512 eI.labelSetSize];
 %eI.temporalLayer = 1;
+%eI.saveDir = [saveDir '/TIMIT_full/recur_1hid/forth']; % DO NOT END PATH WITH "/"
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 2 hidden layers, non-recurrent:
+%eI.layerSizes = [512 512 eI.labelSetSize];
+%eI.temporalLayer = 0;
+%eI.saveDir = [saveDir '/TIMIT_full/nonrecur_2hid/forth']; % DO NOT END PATH WITH "/"
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 2 hidden layers, recurrent:
-%eI.layerSizes = [512 512 eI.labelSetSize];
-%eI.temporalLayer = 1;
+eI.layerSizes = [512 512 eI.labelSetSize];
+eI.temporalLayer = 1;
+eI.saveDir = [saveDir '/TIMIT_full/recur_2hid/forth']; % DO NOT END PATH WITH "/"
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 3 hidden layer, non-recurrent:
 %eI.layerSizes = [512 512 512 eI.labelSetSize];
 %eI.temporalLayer = 0;
+%eI.saveDir = [saveDir '/TIMIT_full/nonrecur_3hid/first']; % DO NOT END PATH WITH "/"
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 3 hidden layers, recurrent:
-eI.layerSizes = [512 512 512 eI.labelSetSize];
-eI.temporalLayer = 1;
+%eI.layerSizes = [512 512 512 eI.labelSetSize];
+%eI.temporalLayer = 1;
+%eI.saveDir = [saveDir '/TIMIT_full/recur_3hid/first']; % DO NOT END PATH WITH "/"
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % dim of network input at each timestep (final size after window & whiten)
@@ -70,10 +79,7 @@ eI.activationFn = 'tanh';
 eI.temporalInit = 'rand';
 % weight norm penaly
 eI.lambda = 0;
-%% setup weight caching
-saveDir = './models';
-eI.saveDir = [saveDir '/TIMIT_full/recur_3hid/second']; % DO NOT END PATH WITH "/"
-%eI.saveDir = [saveDir '/TIMIT_full/sixth'];
+
 mkdir(eI.saveDir);
 
 %%%%%%%%%%%%%%%%%%%%%
@@ -82,8 +88,8 @@ mkdir(eI.saveDir);
 [stack_i, W_t_i] = initialize_weights(eI);
 [theta] = rnn_stack2params(stack_i, eI, W_t_i);
 
-%[stack_new, W_t_new] = rnn_params2stack(theta,eI);
-%[theta_new] = rnn_stack2params(stack_new, eI, W_t_new);
+[stack_new, W_t_new] = rnn_params2stack(theta,eI);
+[theta_new] = rnn_stack2params(stack_new, eI, W_t_new);
 
 %%%%%%%%%
 % Restart training from previous model
