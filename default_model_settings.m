@@ -23,4 +23,4 @@ function [ eI ]  = default_model_settings()
   eI.temporalInit = 'rand';
   % weight norm penaly
   eI.lambda = 0;
-end;
+%end;

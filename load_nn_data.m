@@ -9,7 +9,9 @@ function [ data_cell, target_cell, utt_dat]  = load_nn_data(dir, file_num, feat_
   %             If true, ignore seqLen and perform no chopping and
   %             no aggregating of inputs.
 	 
-  addpath('/home/mkayser/school/classes/2013_14_spring/cs224s/project/other-resources/kaldi-stanford-master/stanford-nnet/util');
+  %addpath('/home/mkayser/school/classes/2013_14_spring/cs224s/project/other-resources/kaldi-stanford-master/stanford-nnet/util');
+%addpath('../kaldi-stanford-master/stanford-nnet/util');
+
 
 	 
   
@@ -131,11 +133,11 @@ function [ data_cell, target_cell, utt_dat]  = load_nn_data(dir, file_num, feat_
   end;
 
   if(train_mode) 
-    assert(seqLenPositions == seqLenSizes+1);
+    assert(isequal(seqLenPositions,seqLenSizes+1));
   end;
 
 
-end;
+%end;
 
 
 

@@ -86,7 +86,7 @@ function [ cost, grad, numTotal, pred_cell ] = drdae_obj( theta, eI, data_cell, 
 
   %% loop over each distinct length
   for c = 1:numel(data_cell)
-    if(pred_out && size(data_cell{c},2) != 1) 
+    if(pred_out && (size(data_cell{c},2) ~= 1)) 
       error('If pred_out is true, there must be only one utterance in each cell');
     end;
     data = data_cell{c};
@@ -265,5 +265,5 @@ function [ cost, grad, numTotal, pred_cell ] = drdae_obj( theta, eI, data_cell, 
             sum(W_t(:).^2), sum(stack{end}.W(:).^2));
   % plot(theta,'kx');drawnow;
   end;
-end;
+%end;
 

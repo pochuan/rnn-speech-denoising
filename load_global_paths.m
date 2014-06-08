@@ -16,4 +16,4 @@ function [ paths ]  = load_global_paths()
   paths.testDataDir         = sprintf('%s/test', paths.rootDir); 
   paths.likelihoodsDir      = sprintf('%s/likelihoods/', paths.rootDir);
   paths.modelDir            = sprintf('%s/models', paths.rootDir);
-end;
+%end;

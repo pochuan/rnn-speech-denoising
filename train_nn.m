@@ -29,4 +29,4 @@ function [ output ]  = train_nn(eI, num_training_utterances)
   options.outputFcn = @save_callback;
   %% run optimizer
   [~,~,~,output] = minFunc(@drdae_obj, theta, options, eI, data_cell, targets_cell, false, false);
-end;
+%end;
