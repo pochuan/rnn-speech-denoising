@@ -37,19 +37,23 @@ function [] = run_experiment(id_to_run)
     case 1
       % 1 layer non-recurrent
       eI.modelName = 'nonrecur_1hid_lambda.0005';
+      eI.layerSizes = [512 eI.labelSetSize];
       eI.lambda = 0.0005;
     case 2
       % 2 layer non-recurrent
       eI.modelName = 'nonrecur_2hid_lambda.0005';
+      eI.layerSizes = [512 512 eI.labelSetSize];
       eI.lambda = 0.0005;
     case 3
       % 1 layer recurrent
       eI.modelName = 'recur1_1hid_lambda.0005';
+      eI.layerSizes = [512 eI.labelSetSize];
       eI.temporalLayer = 1;
       eI.lambda = 0.0005;
     case 4
       % 2 layer recurrent
       eI.modelName = 'recur2_2hid_lambda.0005';
+      eI.layerSizes = [512 512 eI.labelSetSize];
       eI.temporalLayer = 2;
       eI.lambda = 0.0005;
   end;
