@@ -89,4 +89,4 @@ function [ ]  = compute_likelihoods(model_name, model_iter_num, test_input_dir, 
     numUttsDone = numUttsDone+length(utt_keys_subarray);
   end
   fclose(fid);
-end;
+%end;
